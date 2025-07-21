@@ -1,0 +1,6 @@
+requests==2.32.3
+rich==13.7.1
+cryptography==42.0.5
+pytest==8.0.0  # For unit tests
+schedule==1.2.1  # For scheduling support
+concurrent.futures  # Built-in, no need to install 

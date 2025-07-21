@@ -1,0 +1,85 @@
+# General patterns
+*.log
+*.tmp
+*.bak
+*~
+
+# Dependency directories
+node_modules/
+venv/
+
+# Python files
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Configuration and environment files
+.env
+*.config
+*.settings
+
+# IDE/editor directories
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# SSH keys and credentials
+*.pem
+*.key
+*.crt
+
+# OS Files
+._*
+*.swp
+*.swn
+*.swo
+session.lock
+*.ldb
+
+# Secret management
+*.secrets
+secrets.json
+
+# Other sensitive files
+private/
+config/
+
+# Auto-generated files
+/build/
+/dist/
+*.lock
+
+# Email sync specific
+tokens/
+*.json
+!package.json
+!tsconfig.json
+oauth_tokens.json
+*.db
+*.sqlite
+*.sqlite3
+
+# Email archives
+archive/
+email_archive/
+*.eml
+*.msg
+*.mbox
+
+# Local configuration
+local_config.py
+config.local.py
+*.local
+
+# Test data
+test_data/
+*.test
+
+# Temporary sync files
+sync_state/
+.sync/
+*.sync
+*.tmp.*
