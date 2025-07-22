@@ -1,5 +1,8 @@
 # General patterns
 *.log
+*.LOG
+LOG_*
+logs/
 *.tmp
 *.bak
 *~
