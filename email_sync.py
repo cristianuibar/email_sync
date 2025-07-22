@@ -499,8 +499,16 @@ def new_add_account_command(config_manager: ConfigManager, args):
         console.print("  python3 email_sync.py setup --client-id YOUR_ID --client-secret YOUR_SECRET")
         return
     
-    # Load current configuration
-    config_manager.load_configuration(None)
+    # Load current configuration to get OAuth config
+    oauth_manager: Optional[OAuth2Manager] = None
+    config_manager.load_configuration(oauth_manager)
+    if config_manager.oauth_config:
+        oauth_manager = OAuth2Manager(
+            config_manager.oauth_config['client_id'],
+            config_manager.oauth_config['client_secret'],
+            config_manager.oauth_config.get('tenant_id', 'common'),
+            TOKENS_DIR
+        )
     
     # Validate email
     if '@' not in args.email:
@@ -566,7 +574,7 @@ def new_add_account_command(config_manager: ConfigManager, args):
     config_manager.dest_config['passwords'][dest_email] = dest_password
     
     # Save configuration
-    config_manager.save_configuration(None)
+    config_manager.save_configuration(oauth_manager)
     
     console.print("[bold green]✅ Account added successfully![/bold green]")
     console.print(f"[green]Source: {args.email} → Destination: {dest_email}[/green]")
