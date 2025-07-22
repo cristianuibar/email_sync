@@ -28,11 +28,18 @@ A streamlined email synchronization tool with OAuth2 and password authentication
    python3 email_sync.py status
    ```
 
+4. **Add Additional Office 365 Account** (after initial setup):
+   ```bash
+   python3 email_sync.py add-account
+   ```
+
 ## Commands
 
 - `setup` - Run interactive setup wizard
 - `sync` - Start synchronization
 - `status` - Show current status
+- `add-account` - Add a new Office 365 account to existing configuration
+- `clear` - Clear all configuration files and tokens
 - `help` - Show help message
 
 ## Configuration
@@ -89,6 +96,25 @@ email_sync/
    - On Ubuntu: `sudo apt install imapsync`
    - Or download from https://imapsync.lamiral.info/
 
+## Adding Additional Accounts
+
+After completing the initial setup, you can add additional Office 365 accounts without reconfiguring the entire system:
+
+```bash
+python3 email_sync.py add-account
+```
+
+The add-account command will prompt for:
+- **Source Office 365 email address** - The Office 365 account you want to sync from
+- **Destination email address** - Where the emails should be synced to (can be different from source)
+- **Destination IMAP password** - Password for the destination account (input is hidden for security)
+
+**Note:** The add-account command:
+- Only supports Office 365 accounts (uses existing OAuth2 configuration)
+- Requires that you have already completed the initial setup wizard
+- Uses the existing destination server settings
+- Does not require re-entering OAuth2 credentials
+
 ## New Features
 
 - Encrypted storage for passwords and secrets
@@ -96,6 +122,35 @@ email_sync/
 - Dry-run mode: `python3 email_sync.py sync --dry-run`
 - Retry logic for transient sync errors
 - Unit tests: Run `pytest` in the project root
+
+## Example Workflow
+
+1. **Initial Setup** (configures OAuth2, destination server, and first accounts):
+   ```bash
+   python3 email_sync.py setup
+   ```
+
+2. **Add additional Office 365 accounts** (uses existing configuration):
+   ```bash
+   python3 email_sync.py add-account
+   ```
+   - Prompts: `user2@company.com` → `user2@destination.com` + password
+
+3. **Add another account**:
+   ```bash
+   python3 email_sync.py add-account
+   ```
+   - Prompts: `user3@company.com` → `user3@destination.com` + password
+
+4. **Check status of all accounts**:
+   ```bash
+   python3 email_sync.py status
+   ```
+
+5. **Start synchronization**:
+   ```bash
+   python3 email_sync.py sync
+   ```
 
 ## Scheduling
 

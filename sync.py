@@ -281,6 +281,12 @@ class SyncManager:
             raise RuntimeError(error_msg)
     
     def sync_accounts(self, debug: bool = False, dry_run: bool = False, max_parallel: int = 1):
+        # Verify global configuration has been loaded properly
+        if not self.config_manager.dest_config:
+            console.print("[red]❌ Global configuration not loaded. Please run setup first.[/red]")
+            logger.error("Global configuration missing or empty")
+            return
+            
         accounts = self.config_manager.accounts
         if not accounts:
             console.print("[red]No accounts configured. Please run setup first.[/red]")
@@ -293,7 +299,7 @@ class SyncManager:
             logger.info("Debug mode enabled for sync operation")
             console.print("[yellow]Debug mode enabled[/yellow]")
             
-        # Test destination connection with output
+        # Test destination connection with output using global config
         console.print("[yellow]Testing destination server connection...[/yellow]")
         if not self._test_destination_connection_silent():
             console.print("[red]✗ Failed to connect to destination server. Check logs for details.[/red]")
@@ -302,9 +308,10 @@ class SyncManager:
             
         dest_passwords = self.config_manager.dest_config.get('passwords', {})
         
-        # Process accounts one by one with detailed output
+        # Process accounts one by one with detailed output (iterating over accounts from global config)
         for i, account in enumerate(accounts, 1):
             console.print(f"\n[bold cyan]--- Account {i}/{len(accounts)}: {account.email} ---[/bold cyan]")
+            logger.info(f"Processing account {i}/{len(accounts)}: {account.email} (Office365: {account.is_office365})")
             
             dest_email = account.dest_email
             dest_password = dest_passwords.get(dest_email)
