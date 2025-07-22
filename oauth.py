@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 OAUTH_CONFIG = {
     "tenant_id": "common",
-    "redirect_uri": "http://localhost:8080/callback",
+    "redirect_uri": os.getenv("OAUTH_REDIRECT_URI", "http://localhost:8080/callback"),
     "scopes": [
         "https://outlook.office365.com/IMAP.AccessAsUser.All",
         "offline_access"

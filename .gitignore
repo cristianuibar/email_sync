@@ -3,6 +3,19 @@
 *.LOG
 LOG_*
 logs/
+log/
+*.log.*
+*.log[0-9]*
+*.log-*
+*.log_*
+*.out
+*.err
+*.trace
+*.debug
+*.info
+*.warn
+*.error
+*.fatal
 *.tmp
 *.bak
 *~
@@ -64,6 +77,14 @@ oauth_tokens.json
 *.db
 *.sqlite
 *.sqlite3
+
+# Environment configuration
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+!.env.example
 
 # Email archives
 archive/

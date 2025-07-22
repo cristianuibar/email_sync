@@ -51,6 +51,17 @@ The script will ask for:
 - **Passwords** (for local accounts only)
 - **Destination server** settings
 
+### Environment Variables
+
+You can configure default values using environment variables:
+- `OAUTH_REDIRECT_URI` - OAuth redirect URI (default: http://localhost:8080/callback)
+- `DEST_IMAP_HOST` - Destination IMAP server (default: localhost)
+- `DEST_IMAP_PORT` - Destination IMAP port (default: 993)
+- `DEST_IMAP_SSL` - Use SSL (default: true)
+- `DEST_IMAP_SSL_VERIFY` - Verify SSL certificates (default: false)
+
+Copy `.env.example` to `.env` and customize as needed.
+
 ## Directory Structure
 
 ```
@@ -156,8 +167,10 @@ The add-account command will prompt for:
 
 To run sync every hour, add to crontab:
 ```bash
-0 * * * * /usr/bin/python3 /path/to/email_sync.py sync
+0 * * * * /usr/bin/python3 /path/to/your/email_sync.py sync
 ```
+
+Replace `/path/to/your/` with the actual path to your installation directory.
 
 ## License
 

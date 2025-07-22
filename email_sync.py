@@ -70,7 +70,7 @@ OAUTH_TOKENS = TOKENS_DIR / "oauth_tokens.json"
 # Office 365 OAuth2 Configuration
 OAUTH_CONFIG = {
     "tenant_id": "common",  # Will be updated with user input
-    "redirect_uri": "http://localhost:8080/callback",
+    "redirect_uri": os.getenv("OAUTH_REDIRECT_URI", "http://localhost:8080/callback"),
     "scopes": [
         "https://outlook.office365.com/IMAP.AccessAsUser.All",
         "offline_access"
@@ -104,12 +104,12 @@ def main():
     setup_parser.add_argument('--client-id', required=True, help='Azure App Client ID')
     setup_parser.add_argument('--client-secret', required=True, help='Azure App Client Secret')
     setup_parser.add_argument('--tenant-id', default='common', help='Tenant ID (default: common)')
-    setup_parser.add_argument('--host', default='localhost', help='Destination IMAP server host (default: localhost)')
-    setup_parser.add_argument('--port', type=valid_port, default=993, help='Destination IMAP server port (default: 993)')
-    setup_parser.add_argument('--ssl', action='store_true', default=True, help='Use SSL for destination server (default: True)')
+    setup_parser.add_argument('--host', default=os.getenv('DEST_IMAP_HOST', 'localhost'), help='Destination IMAP server host (default: localhost)')
+    setup_parser.add_argument('--port', type=valid_port, default=int(os.getenv('DEST_IMAP_PORT', '993')), help='Destination IMAP server port (default: 993)')
+    setup_parser.add_argument('--ssl', action='store_true', default=os.getenv('DEST_IMAP_SSL', 'true').lower() == 'true', help='Use SSL for destination server (default: True)')
     setup_parser.add_argument('--no-ssl', action='store_true', help='Disable SSL for destination server')
     setup_parser.add_argument('--ssl-verify', action='store_true', help='Verify SSL certificates')
-    setup_parser.add_argument('--no-ssl-verify', action='store_true', default=True, help='Skip SSL certificate verification (default)')
+    setup_parser.add_argument('--no-ssl-verify', action='store_true', default=os.getenv('DEST_IMAP_SSL_VERIFY', 'false').lower() == 'false', help='Skip SSL certificate verification (default)')
 
     # Add-account command - accepts user email and sync configuration
     addaccount_parser = subparsers.add_parser('add-account', help='Add a new email account for synchronization')
@@ -232,8 +232,9 @@ def interactive_setup(config_manager: ConfigManager, oauth_manager: Optional[OAu
     print("-" * 50)
     
     # Get destination host
-    host_input = input("Destination IMAP server host [localhost]: ").strip()
-    host = host_input if host_input else "localhost"
+    default_host = os.getenv('DEST_IMAP_HOST', 'localhost')
+    host_input = input(f"Destination IMAP server host [{default_host}]: ").strip()
+    host = host_input if host_input else default_host
     
     # Get port with validation
     while True:
