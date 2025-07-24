@@ -49,6 +49,7 @@ from rich.table import Table
 from config import ConfigManager, EmailAccount
 from oauth import OAuth2Manager
 from sync import SyncManager
+from sync_improved import ImprovedSyncManager
 from utils import setup_logging, signal_handler
 
 # Configuration
@@ -128,6 +129,8 @@ def main():
     sync_parser = subparsers.add_parser('sync', help='Start email synchronization')
     sync_parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     sync_parser.add_argument('--dry-run', action='store_true', help='Simulate sync without changes')
+    sync_parser.add_argument('--parallel', type=int, default=1, help='Number of accounts to sync in parallel (default: 1)')
+    sync_parser.add_argument('--improved', action='store_true', help='Use improved sync with folder batching and better error handling')
 
     subparsers.add_parser('status', help='Show current status of configured accounts')
     subparsers.add_parser('clear', help='Clear all configuration files and tokens')
@@ -165,7 +168,17 @@ def main():
         # Handle both --debug from sync command and global --debug
         debug_mode = getattr(args, 'debug', False) or args.debug
         dry_run = getattr(args, 'dry_run', False)
-        sync_manager.sync_accounts(debug_mode, dry_run)
+        
+        if args.improved:
+            # Use improved sync manager with parallel processing
+            improved_sync_manager = ImprovedSyncManager(
+                config_manager, oauth_manager, LOGS_DIR, IMAPSYNC_LOGS_DIR,
+                shutdown_event, active_processes
+            )
+            improved_sync_manager.sync_accounts_parallel(debug_mode, dry_run, max_parallel=args.parallel)
+        else:
+            # Use regular sync manager
+            sync_manager.sync_accounts(debug_mode, dry_run)
     elif args.command == 'status':
         show_status(config_manager, oauth_manager)
     elif args.command == 'clear':
@@ -618,6 +631,8 @@ def show_help():
     console.print("\n  [cyan]sync[/cyan] - Start email synchronization")
     console.print("    --debug                   Enable debug logging")
     console.print("    --dry-run                 Simulate without making changes")
+    console.print("    --parallel N              Sync N accounts in parallel (default: 1)")
+    console.print("    --improved                Use improved sync with folder batching")
     
     console.print("\n  [cyan]status[/cyan] - Show account status")
     console.print("  [cyan]clear[/cyan] - Clear all configuration")
@@ -644,6 +659,9 @@ def show_help():
     console.print("\n  [dim]# Start synchronization[/dim]")
     console.print("  python3 email_sync.py sync")
     console.print("  python3 email_sync.py sync --dry-run --debug")
+    
+    console.print("\n  [dim]# Improved parallel sync (faster, handles token expiration)[/dim]")
+    console.print("  python3 email_sync.py sync --improved --parallel 5")
     
     console.print("\n[bold]Migration from Legacy Command:[/bold]")
     console.print("  [yellow]Old monolithic command is deprecated.[/yellow] Use the new structured approach:")
