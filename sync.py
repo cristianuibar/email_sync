@@ -173,6 +173,8 @@ class SyncManager:
         messages_processed = 0
         total_messages = 0
         collected_output = []
+        folder_analysis_phase = True  # Track whether we're in folder analysis or actual sync phase
+        current_folder = None
         
         assert process.stdout is not None, 'stdout not set'
         while True:
@@ -193,12 +195,38 @@ class SyncManager:
                     console.print(f"[green]✓ Connected to destination server[/green]")
                     logger.info(f"Connected to destination server for {account.email}")
                 
-                # Show folder information
-                if "folders list" in line.lower() or "folder" in line.lower() and "has" in line.lower() and "messages" in line.lower():
-                    folder_match = re.search(r'folder \[(.*?)\] has (\d+) messages', line)
+                # Detect sync phases
+                if "++++ Looping on each one of" in line and "folders to sync" in line:
+                    folder_analysis_phase = False  # We're now in actual sync phase
+                    
+                # Show folder information with better parsing to avoid duplicates
+                # Track source vs destination folder info with phase awareness
+                if "Host1 folder" in line and "has" in line and "messages" in line:
+                    folder_match = re.search(r'Host1 folder \[(.*?)\] has (\d+) messages', line)
                     if folder_match:
                         folder_name, msg_count = folder_match.groups()
-                        console.print(f"[dim]Folder '{folder_name}': {msg_count} messages[/dim]")
+                        if folder_analysis_phase:
+                            console.print(f"[dim]📁 Source folder '{folder_name}' has {msg_count} messages[/dim]")
+                elif "Host2 folder" in line and "has" in line and "messages" in line:
+                    folder_match = re.search(r'Host2 folder \[(.*?)\] has (\d+) messages', line)
+                    if folder_match:
+                        folder_name, msg_count = folder_match.groups()
+                        if folder_analysis_phase:
+                            console.print(f"[dim]📂 Destination folder '{folder_name}' has {msg_count} messages[/dim]")
+                elif "folder [" in line.lower() and "has" in line.lower() and "messages" in line.lower() and "host" not in line.lower():
+                    # Generic folder message - only show during analysis phase to avoid duplicates
+                    if folder_analysis_phase:
+                        folder_match = re.search(r'folder \[(.*?)\] has (\d+) messages', line)
+                        if folder_match:
+                            folder_name, msg_count = folder_match.groups()
+                            console.print(f"[dim]📁 Folder '{folder_name}': {msg_count} messages[/dim]")
+                
+                # Better folder sync detection
+                if "++++ Folder" in line and "ended" in line:
+                    folder_end_match = re.search(r'\+\+\+\+ Folder \[(.*?)\] ended', line)
+                    if folder_end_match:
+                        folder_name = folder_end_match.group(1)
+                        console.print(f"[green]✓ Completed syncing folder '{folder_name}' [/green]")
                 
                 # Show overall sync progress
                 total_match = re.search(r'there are (\d+) among (\d+) identified messages', line)

@@ -107,3 +107,4 @@ sync_state/
 .sync/
 *.sync
 *.tmp.*
+*.pid
